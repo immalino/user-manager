@@ -12,6 +12,17 @@ export interface ErrorResponse {
 import { router } from "@/src";
 export type AppType = typeof router;
 
-export type { CreateUser, GetUsers, GetUser, UpdateUser, DeleteUser } from "../server/src/users/user.routes"
+export type {
+  CreateUser,
+  GetUsers,
+  GetUser,
+  UpdateUser,
+  DeleteUser,
+} from "../server/src/users/user.routes";
 
-export { createUserSchema, selectUserSchema, updateUserSchema } from "../server/src/users/user.schema";
+export {
+  createUserSchema,
+  selectUserSchema,
+  updateUserSchema,
+  User,
+} from "../server/src/users/user.schema";

@@ -1,4 +1,4 @@
-import { createRoute } from "@hono/zod-openapi";
+import { createRoute, z } from "@hono/zod-openapi";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema } from "stoker/openapi/schemas";
 
@@ -9,6 +9,7 @@ import database from "../db";
 import { usersTable } from "../db/schema";
 import { HTTPException } from "hono/http-exception";
 import { DrizzleQueryError } from "drizzle-orm/errors";
+import { eq } from "drizzle-orm";
 
 const createUserRoute = createRoute({
   method: "post",
@@ -24,6 +25,35 @@ const createUserRoute = createRoute({
   },
 });
 
+const getUserRoute = createRoute({
+  method: "get",
+  path: "/{id}",
+  request: {
+    params: z.object({
+      id: z.string().uuid(),
+    }),
+  },
+  responses: {
+    200: jsonContent(
+      createSuccessSchema(selectUserSchema, "Success get user"),
+      "OK"
+    ),
+    400: jsonContent(
+      createErrorSchema(
+        z.object({
+          id: z.string().uuid(),
+        })
+      ),
+      "Bad request"
+    ),
+    404: jsonContent(ErrorResponseSchema("User not found", false), "Not found"),
+    500: jsonContent(
+      ErrorResponseSchema("Internal Server Error", false),
+      "Internal Server Error"
+    ),
+  },
+});
+
 export const userRouter = createRouter()
   .openapi(createUserRoute, async (c) => {
     const userData = c.req.valid("json");
@@ -32,7 +62,7 @@ export const userRouter = createRouter()
       return c.json({
         success: true,
         message: "Success create user",
-        data: {...newUser, updatedAt: newUser.updatedAt || newUser.createdAt},
+        data: newUser,
       }, 201);
     } catch (error) {
       console.log(error)
@@ -44,4 +74,21 @@ export const userRouter = createRouter()
       }
       throw new HTTPException( 500, { message: "Internal Server Error" });
     }
+  }).openapi(getUserRoute, async (c) => {
+    const { id } = c.req.valid("param");
+    const [user] = await database
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, id))
+      .limit(1);
+    
+    if (!user) {
+      throw new HTTPException(404, { message: "User not found" });
+    }
+
+    return c.json({
+      success: true,
+      message: "Success get user",
+      data: user
+    }, 200)
   });

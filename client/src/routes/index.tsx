@@ -5,5 +5,5 @@ export const Route = createFileRoute('/')({
 })
 
 function RouteComponent() {
-  return <div>Hello world</div>
+  return <div className='min-h-screen'></div>
 }

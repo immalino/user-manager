@@ -1,9 +1,13 @@
 import { serve } from "@hono/node-server";
-import { Hono } from "hono";
 
 import env from "@/env";
 
-const app = new Hono();
+import configureOpenApi from "./libs/configure-open-api";
+import createApp from "./libs/create-app";
+
+const app = createApp();
+
+configureOpenApi(app);
 
 app.get("/", (c) => {
   return c.text("Hello Hono!");

@@ -6,12 +6,14 @@
     "jsxImportSource": "hono/jsx",
     "lib": ["ESNext"],
     "moduleDetection": "force",
+    "baseUrl": "./",
     "module": "ESNext",
 
     "moduleResolution": "bundler",
 
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@shared/*": ["../shared/*"]
     },
     "allowImportingTsExtensions": true,
     "allowJs": true,
@@ -26,5 +28,6 @@
     "noEmit": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true
-  }
+  },
+  "include": ["../shared/**/*", "./**/*"]
 }

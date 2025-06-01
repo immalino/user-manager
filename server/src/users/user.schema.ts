@@ -10,6 +10,9 @@ export const createUserSchema = z.object({
   phone: z.string().min(10, { message: "Phone number must be at least 10 characters long" }).regex(/^\d+$/, { message: "Phone number must contain only numbers" }).openapi({
     example: "1234567890",
   }),
+  isActive: z.boolean().default(true).openapi({
+    example: true,
+  }),
   department: z.string().min(1, { message: "Department cannot be empty" }).openapi({
     example: "IT",
   }),

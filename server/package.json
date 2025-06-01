@@ -19,6 +19,7 @@
     "drizzle-zod": "^0.8.2",
     "hono": "^4.7.11",
     "pg": "^8.16.0",
+    "stoker": "^1.4.2",
     "zod": "^3.25.45"
   },
   "devDependencies": {

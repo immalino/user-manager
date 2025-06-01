@@ -4,14 +4,13 @@ import env from "@/env";
 
 import configureOpenApi from "./libs/configure-open-api";
 import createApp from "./libs/create-app";
+import { userRouter } from "./users/user.routes";
 
-const app = createApp();
+const app = createApp().basePath("/api/v1");
 
 configureOpenApi(app);
 
-app.get("/", (c) => {
-  return c.text("Hello Hono!");
-});
+app.route("/users", userRouter);
 
 serve(
   {

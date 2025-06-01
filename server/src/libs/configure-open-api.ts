@@ -5,7 +5,7 @@ import { Scalar } from "@scalar/hono-api-reference";
 import packageJSON from "../../package.json";
 
 export default function configureOpenApi(app: OpenAPIHono) {
-  app.doc("/api/v1/doc", {
+  app.doc("/doc", {
     openapi: "3.0.0",
     info: {
       version: packageJSON.version,
@@ -14,7 +14,7 @@ export default function configureOpenApi(app: OpenAPIHono) {
   });
 
   app.get(
-    "/api/v1/reference",
+    "/reference",
     Scalar({
       theme: "kepler",
       layout: "classic",

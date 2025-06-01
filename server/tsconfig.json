@@ -1,16 +1,30 @@
 {
   "compilerOptions": {
+    "composite": true,
     "target": "ESNext",
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "module": "NodeNext",
-    "types": [
-      "node"
-    ],
+    "lib": ["ESNext"],
+    "moduleDetection": "force",
+    "module": "ESNext",
+
+    "moduleResolution": "bundler",
+
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "maxNodeModuleJsDepth": 1000,
+
     "strict": true,
-    "outDir": "./dist",
+    "noFallthroughCasesInSwitch": true,
+
+    "noPropertyAccessFromIndexSignature": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true
-  },
-  "exclude": ["node_modules"]
+  }
 }

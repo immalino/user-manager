@@ -44,3 +44,5 @@ export const selectUserSchema = z.object({
     example: "2025-05-31T00:00:00.000Z",
   }),
 });
+
+export const updateUserSchema = createUserSchema.partial();

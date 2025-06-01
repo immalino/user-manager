@@ -9,7 +9,7 @@ import database from "../db";
 import { usersTable } from "../db/schema";
 import { HTTPException } from "hono/http-exception";
 import { DrizzleQueryError } from "drizzle-orm/errors";
-import { eq } from "drizzle-orm";
+import { eq, ilike } from "drizzle-orm";
 
 const createUserRoute = createRoute({
   method: "post",
@@ -24,6 +24,26 @@ const createUserRoute = createRoute({
     500: jsonContent(ErrorResponseSchema("Internal Server Error", false), "Internal Server Error"),
   },
 });
+
+const getUsersRoute = createRoute({
+  method: "get",
+  path: "/",
+  request: {
+    query: z.object({
+      search: z.string().optional(),
+    }),
+  },
+  responses: {
+    200: jsonContent(
+      createSuccessSchema(z.array(selectUserSchema), "Success get users"),
+      "OK"
+    ),
+    500: jsonContent(
+      ErrorResponseSchema("Internal Server Error", false),
+      "Internal Server Error"
+    ),
+  },
+})
 
 const getUserRoute = createRoute({
   method: "get",
@@ -74,7 +94,19 @@ export const userRouter = createRouter()
       }
       throw new HTTPException( 500, { message: "Internal Server Error" });
     }
-  }).openapi(getUserRoute, async (c) => {
+  })
+  .openapi(getUsersRoute, async (c) => {
+    const { search } = c.req.valid("query");
+    const users = await database.select().from(usersTable).where( 
+      search ?  ilike(usersTable.name, `%${search}%`) : undefined
+    );
+    return c.json({
+      success: true,
+      message: "Success get users",
+      data: users,
+    }, 200);
+  })
+  .openapi(getUserRoute, async (c) => {
     const { id } = c.req.valid("param");
     const [user] = await database
       .select()

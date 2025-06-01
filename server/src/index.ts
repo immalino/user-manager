@@ -10,7 +10,8 @@ const app = createApp().basePath("/api/v1");
 
 configureOpenApi(app);
 
-app.route("/users", userRouter);
+
+export const router = app.route("/users", userRouter);
 
 serve(
   {

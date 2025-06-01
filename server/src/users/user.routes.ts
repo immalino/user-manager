@@ -137,125 +137,143 @@ const deleteUserRoute = createRoute({
   }
 })
 
-export const userRouter = createRouter()
-  .openapi(createUserRoute, async (c) => {
-    const userData = c.req.valid("json");
-    try {
-      const [newUser] = await database
-        .insert(usersTable)
-        .values(userData)
-        .returning();
-      return c.json(
-        {
-          success: true,
-          message: "Success create user",
-          data: newUser,
-        },
-        201
-      );
-    } catch (error) {
-      if (
-        error instanceof DrizzleQueryError &&
-        error.cause?.message ===
-          'duplicate key value violates unique constraint "users_email_unique"'
-      ) {
-        throw new HTTPException(409, {
-          message: "Email already exists",
-          cause: { form: true },
-        });
-      }
-      throw new HTTPException(500, { message: "Internal Server Error" });
-    }
-  })
-  .openapi(getUsersRoute, async (c) => {
-    const { search } = c.req.valid("query");
-    const users = await database
-      .select()
-      .from(usersTable)
-      .where(search ? ilike(usersTable.name, `%${search}%`) : undefined);
+const createUser = createRouter().openapi(createUserRoute, async (c) => {
+  const userData = c.req.valid("json");
+  try {
+    const [newUser] = await database
+      .insert(usersTable)
+      .values(userData)
+      .returning();
     return c.json(
       {
         success: true,
-        message: "Success get users",
-        data: users,
-      },
-      200
-    );
-  })
-  .openapi(getUserRoute, async (c) => {
-    const { id } = c.req.valid("param");
-    const [user] = await database
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, id))
-      .limit(1);
-
-    if (!user) {
-      throw new HTTPException(404, { message: "User not found" });
-    }
-
-    return c.json(
-      {
-        success: true,
-        message: "Success get user",
-        data: user,
-      },
-      200
-    );
-  })
-  .openapi(updateUserRoute, async (c) => {
-    const { id } = c.req.valid("param");
-    const userData = c.req.valid("json");
-
-    let updatedUser
-
-    try {
-      [updatedUser] = await database
-        .update(usersTable)
-        .set(userData)
-        .where(eq(usersTable.id, id))
-        .returning();
-    } catch (error) {
-      if (
-        error instanceof DrizzleQueryError &&
-        error.cause?.message ===
-          'duplicate key value violates unique constraint "users_email_unique"') {
-        throw new HTTPException(409, {
-          message: "Email already exists",
-          cause: { form: true },
-        });
-      }
-
-      throw new HTTPException(500, { message: "Internal Server Error" });
-    }
-
-    if (!updatedUser) {
-     throw new HTTPException(404, { message: "User not found" });
-    }
-
-    return c.json(
-      {
-        success: true,
-        message: "Success update user",
-        data: updatedUser,
+        message: "Success create user",
+        data: newUser,
       },
       201
     );
-  })
-  .openapi(deleteUserRoute, async (c) => {
-    const { id } = c.req.valid("param");
-    const [deletedUser] = await database
-      .delete(usersTable)
-      .where(eq(usersTable.id, id)).returning();
-
-    if (!deletedUser) {
-      throw new HTTPException(404, { message: "User not found" });
+  } catch (error) {
+    if (
+      error instanceof DrizzleQueryError &&
+      error.cause?.message ===
+        'duplicate key value violates unique constraint "users_email_unique"'
+    ) {
+      throw new HTTPException(409, {
+        message: "Email already exists",
+        cause: { form: true },
+      });
     }
-    return c.json(
-      {
-        success: true,
-        message: "Success delete user",
-      },
-      200
-    );
-  });
+    throw new HTTPException(500, { message: "Internal Server Error" });
+  }
+}); 
+
+const getUsers = createRouter().openapi(getUsersRoute, async (c) => {
+  const { search } = c.req.valid("query");
+  const users = await database
+    .select()
+    .from(usersTable)
+    .where(search ? ilike(usersTable.name, `%${search}%`) : undefined);
+  return c.json(
+    {
+      success: true,
+      message: "Success get users",
+      data: users,
+    },
+    200
+  );
+});
+
+const getUser = createRouter().openapi(getUserRoute, async (c) => {
+  const { id } = c.req.valid("param");
+  const [user] = await database
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, id))
+    .limit(1);
+
+  if (!user) {
+    throw new HTTPException(404, { message: "User not found" });
+  }
+
+  return c.json(
+    {
+      success: true,
+      message: "Success get user",
+      data: user,
+    },
+    200
+  );
+});
+
+const updateUser = createRouter().openapi(updateUserRoute, async (c) => {
+  const { id } = c.req.valid("param");
+  const userData = c.req.valid("json");
+
+  let updatedUser;
+
+  try {
+    [updatedUser] = await database
+      .update(usersTable)
+      .set(userData)
+      .where(eq(usersTable.id, id))
+      .returning();
+  } catch (error) {
+    if (
+      error instanceof DrizzleQueryError &&
+      error.cause?.message ===
+        'duplicate key value violates unique constraint "users_email_unique"'
+    ) {
+      throw new HTTPException(409, {
+        message: "Email already exists",
+        cause: { form: true },
+      });
+    }
+
+    throw new HTTPException(500, { message: "Internal Server Error" });
+  }
+
+  if (!updatedUser) {
+    throw new HTTPException(404, { message: "User not found" });
+  }
+
+  return c.json(
+    {
+      success: true,
+      message: "Success update user",
+      data: updatedUser,
+    },
+    201
+  );
+});
+
+const deleteUser = createRouter().openapi(deleteUserRoute, async (c) => {
+  const { id } = c.req.valid("param");
+  const [deletedUser] = await database
+    .delete(usersTable)
+    .where(eq(usersTable.id, id))
+    .returning();
+
+  if (!deletedUser) {
+    throw new HTTPException(404, { message: "User not found" });
+  }
+  return c.json(
+    {
+      success: true,
+      message: "Success delete user",
+    },
+    200
+  );
+});
+
+export type CreateUser = typeof createUser
+export type GetUsers = typeof getUsers
+export type GetUser = typeof getUser
+export type UpdateUser = typeof updateUser
+export type DeleteUser = typeof deleteUser
+
+export const userRouter = createRouter()
+.route("/", createUser)
+.route("/", getUsers)
+.route("/", getUser)
+.route("/", updateUser)
+.route("/", deleteUser)  

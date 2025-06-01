@@ -2,7 +2,7 @@ import { createRoute, z } from "@hono/zod-openapi";
 import { jsonContent, jsonContentOneOf, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema } from "stoker/openapi/schemas";
 
-import { createSuccessSchema, ErrorResponseSchema } from "../helpers/open-api";
+import { createSuccessSchema, ErrorResponseSchema, SuccessResponseSchema } from "../helpers/open-api";
 import { createRouter } from "../libs/create-app";
 import { createUserSchema, selectUserSchema, updateUserSchema } from "./user.schema";
 import database from "../db";
@@ -11,8 +11,11 @@ import { HTTPException } from "hono/http-exception";
 import { DrizzleQueryError } from "drizzle-orm/errors";
 import { eq, ilike } from "drizzle-orm";
 
+const tags = ["Users"];
+
 const createUserRoute = createRoute({
   method: "post",
+  tags,
   path: "/",
   request: {
     body: jsonContentRequired(createUserSchema, "Create user"),
@@ -27,6 +30,7 @@ const createUserRoute = createRoute({
 
 const getUsersRoute = createRoute({
   method: "get",
+  tags,
   path: "/",
   request: {
     query: z.object({
@@ -47,6 +51,7 @@ const getUsersRoute = createRoute({
 
 const getUserRoute = createRoute({
   method: "get",
+  tags,
   path: "/{id}",
   request: {
     params: z.object({
@@ -76,6 +81,7 @@ const getUserRoute = createRoute({
 
 const updateUserRoute = createRoute({
   method: "put",
+  tags,
   path: "/{id}",
   request: {
     body: jsonContentRequired(updateUserSchema, "Create user"),
@@ -101,6 +107,36 @@ const updateUserRoute = createRoute({
   },
 });
 
+const deleteUserRoute = createRoute({
+  method: "delete",
+  tags,
+  path: "/{id}",
+  request: {
+    params: z.object({
+      id: z.string().uuid(),
+    }),
+  },
+  responses: {
+    200: jsonContent(
+      SuccessResponseSchema("Success delete user"),
+      "Deleted"
+    ),
+    400: jsonContent(
+      createErrorSchema(
+        z.object({
+          id: z.string().uuid(),
+        })
+      ),
+      "Bad request"
+    ),
+    404: jsonContent(ErrorResponseSchema("User not found", false), "Not found"),
+    500: jsonContent(
+      ErrorResponseSchema("Internal Server Error", false),
+      "Internal Server Error"
+    ),
+  }
+})
+
 export const userRouter = createRouter()
   .openapi(createUserRoute, async (c) => {
     const userData = c.req.valid("json");
@@ -118,7 +154,6 @@ export const userRouter = createRouter()
         201
       );
     } catch (error) {
-      console.log(error);
       if (
         error instanceof DrizzleQueryError &&
         error.cause?.message ===
@@ -205,5 +240,22 @@ export const userRouter = createRouter()
         data: updatedUser,
       },
       201
+    );
+  })
+  .openapi(deleteUserRoute, async (c) => {
+    const { id } = c.req.valid("param");
+    const [deletedUser] = await database
+      .delete(usersTable)
+      .where(eq(usersTable.id, id)).returning();
+
+    if (!deletedUser) {
+      throw new HTTPException(404, { message: "User not found" });
+    }
+    return c.json(
+      {
+        success: true,
+        message: "Success delete user",
+      },
+      200
     );
   });

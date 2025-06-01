@@ -11,6 +11,13 @@ export function createSuccessSchema<T extends z.ZodSchema>(
   });
 }
 
+export function SuccessResponseSchema(message: string = "Success") {
+  return z.object({
+    success: z.boolean().openapi({ example: true }),
+    message: z.string().openapi({ example: message }),
+  });
+}
+
 export function ErrorResponseSchema(
   errorMessage: string,
   isFormError: boolean = true

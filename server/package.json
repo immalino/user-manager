@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.3",
+    "@hono/zod-openapi": "^0.19.8",
+    "@scalar/hono-api-reference": "^0.9.1",
     "dotenv": "^16.5.0",
     "dotenv-expand": "^12.0.2",
     "drizzle-orm": "^0.44.1",

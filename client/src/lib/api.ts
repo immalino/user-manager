@@ -14,12 +14,17 @@ const getUserApi = hc<GetUser>("/api/v1/users")[":id"];
 const updateUserApi = hc<UpdateUser>("/api/v1/users")[":id"];
 const deleteUserApi = hc<DeleteUser>("/api/v1/users")[":id"];
 
-export const createUser = async (
-  department: string,
-  email: string,
-  name: string,
-  phone: string
-) => {
+export const createUser = async ({
+  department,
+  email,
+  name,
+  phone,
+}: {
+  department: string;
+  email: string;
+  name: string;
+  phone: string;
+}) => {
   const res = await createUserApi.$post({
     json: {
       department,

@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import {
   BriefcaseBusiness,
   Edit2,
@@ -7,7 +8,7 @@ import {
   User,
 } from "lucide-react";
 
-type User = {
+export type User = {
   id: string;
   name: string;
   email: string;
@@ -18,7 +19,13 @@ type User = {
   updatedAt: string;
 };
 
-const UserList = ({ users }: { users: User[] }) => {
+const UserList = ({
+  users,
+  handleEdit,
+}: {
+  users: User[];
+  handleEdit: (user: User) => void;
+}) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {users.map((user) => (
@@ -27,27 +34,29 @@ const UserList = ({ users }: { users: User[] }) => {
           className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 border border-gray-100 overflow-hidden"
         >
           {/* User Avatar */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-center">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-center relative">
+            <div className="absolute top-4 right-4">
+              <Badge
+                variant={user.isActive ? "default" : "secondary"}
+                className={
+                  user.isActive
+                    ? "bg-green-500 hover:bg-green-600"
+                    : "bg-red-500 hover:bg-red-600 text-white"
+                }
+              >
+                {user.isActive ? "Active" : "Inactive"}
+              </Badge>
+            </div>
             <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-4 border-white shadow-lg">
-              <img
-                src={user.name}
-                alt={user.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = "";
-                  e.currentTarget.style.display = "none";
-                  e.currentTarget.nextElementSibling?.classList.remove(
-                    "hidden"
-                  );
-                }}
-              />
               <div className="w-full h-full bg-white flex items-center justify-center">
                 <User className="w-10 h-10 text-gray-400" />
               </div>
             </div>
-            <h3 className="text-xl font-semibold text-white mb-1">
-              {user.name}
-            </h3>
+            <div className="grid">
+              <h3 className="text-xl truncate font-semibold text-white mb-1">
+                {user.name}
+              </h3>
+            </div>
           </div>
 
           {/* User Info */}
@@ -70,7 +79,11 @@ const UserList = ({ users }: { users: User[] }) => {
             {/* Action Buttons */}
             <div className="flex space-x-2 mt-6">
               <button
-                onClick={() => {}}
+                onClick={() => {
+                  handleEdit({
+                    ...user,
+                  });
+                }}
                 className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-200"
               >
                 <Edit2 className="w-4 h-4 mr-2" />

@@ -20,125 +20,100 @@ export const createUser = async (
   name: string,
   phone: string
 ) => {
-  try {
-    const res = await createUserApi.$post({
-      json: {
-        department,
-        email,
-        name,
-        phone,
-      },
-    });
+  const res = await createUserApi.$post({
+    json: {
+      department,
+      email,
+      name,
+      phone,
+    },
+  });
 
-    if (!res.ok) {
-      const data = (await res.json()) as unknown as ErrorResponse;
-      throw new Error(data.error);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    return {
-      success: false,
-      error: String(error),
-      isFormError: false,
-    } as ErrorResponse;
+  if (!res.ok) {
+    const data = (await res.json()) as unknown as ErrorResponse;
+    throw new Error(data.error);
   }
+  const data = await res.json();
+  return data;
 };
 
 export const getUsers = async (search?: string) => {
-  try {
-    const res = await getUsersApi.$get({
-      query: {
-        search,
-      },
-    });
+  const res = await getUsersApi.$get({
+    query: {
+      search,
+    },
+  });
 
-    if (!res.ok) {
-      const data = (await res.json()) as unknown as ErrorResponse;
-      throw new Error(data.error);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {}
+  if (!res.ok) {
+    const data = (await res.json()) as unknown as ErrorResponse;
+    throw new Error(data.error);
+  }
+  const data = await res.json();
+  return data;
 };
 
 export const getUser = async (id: string) => {
-  try {
-    const res = await getUserApi.$get({
-      param: {
-        id,
-      },
-    });
+  const res = await getUserApi.$get({
+    param: {
+      id,
+    },
+  });
 
-    if (!res.ok) {
-      const data = (await res.json()) as unknown as ErrorResponse;
-      throw new Error(data.error);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    return {
-      success: false,
-      error: String(error),
-      isFormError: false,
-    } as ErrorResponse;
+  if (!res.ok) {
+    const data = (await res.json()) as unknown as ErrorResponse;
+    throw new Error(data.error);
   }
+  const data = await res.json();
+  return data;
 };
 
-export const updateUser = async (
-  id: string,
-  department: string,
-  email: string,
-  name: string,
-  phone: string
-) => {
-  try {
-    const res = await updateUserApi.$put({
-      param: {
-        id,
-      },
-      json: {
-        department,
-        email,
-        name,
-        phone,
-      },
-    });
+export const updateUser = async ({
+  id,
+  department,
+  email,
+  name,
+  phone,
+  isActive,
+}: {
+  id: string;
+  department?: string;
+  email?: string;
+  name?: string;
+  phone?: string;
+  isActive?: boolean;
+}) => {
+  const res = await updateUserApi.$put({
+    param: {
+      id,
+    },
+    json: {
+      department,
+      email,
+      name,
+      phone,
+      isActive,
+    },
+  });
 
-    if (!res.ok) {
-      const data = (await res.json()) as unknown as ErrorResponse;
-      throw new Error(data.error);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    return {
-      success: false,
-      error: String(error),
-      isFormError: false,
-    } as ErrorResponse;
+  if (!res.ok) {
+    const data = (await res.json()) as unknown as ErrorResponse;
+    throw new Error(data.error);
   }
+  const data = await res.json();
+  return data;
 };
 
 export const deleteUser = async (id: string) => {
-  try {
-    const res = await deleteUserApi.$delete({
-      param: {
-        id,
-      },
-    });
+  const res = await deleteUserApi.$delete({
+    param: {
+      id,
+    },
+  });
 
-    if (!res.ok) {
-      const data = (await res.json()) as unknown as ErrorResponse;
-      throw new Error(data.error);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    return {
-      success: false,
-      error: String(error),
-      isFormError: false,
-    } as ErrorResponse;
+  if (!res.ok) {
+    const data = (await res.json()) as unknown as ErrorResponse;
+    throw new Error(data.error);
   }
+  const data = await res.json();
+  return data;
 };

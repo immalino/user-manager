@@ -1,12 +1,18 @@
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const SearchBar = ({
   onSearchChange,
+  searchTerm,
 }: {
   onSearchChange: (term: string) => void;
+  searchTerm: string;
 }) => {
   const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    setInputValue(searchTerm);
+  }, [searchTerm]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value;

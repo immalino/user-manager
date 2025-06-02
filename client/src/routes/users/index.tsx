@@ -1,25 +1,32 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Header from "./-components/header";
 import { useState } from "react";
-import { getUsers } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { deleteUser, getUsers } from "@/lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import SearchBar from "./-components/search-bar";
 import { useDebounce } from "@/hooks/use-debounce";
 import UserList, { type User } from "./-components/user-list";
 import NoResultSearch from "./-components/no-result-search";
 import { toast } from "sonner";
 import EditUserModal from "./-components/edit-user-modal";
+import useConfirm from "@/hooks/use-confirm";
 
 export const Route = createFileRoute("/users/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<Partial<User> | null>(null);
+
+  const [DeleteUserModal, confirmDialog] = useConfirm(
+    "Delete User",
+    "Are you sure you want to delete this user?"
+  );
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["users", debouncedSearchTerm],
@@ -47,6 +54,24 @@ function RouteComponent() {
     setIsEditModalOpen(true);
   };
 
+  const { mutate } = useMutation({
+    mutationFn: async (userId: string) => {
+      return await deleteUser(userId);
+    },
+    onSuccess: ({ message }) => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success(message);
+    },
+  });
+
+  const handleDelete = async (userId: string) => {
+    const ok = await confirmDialog();
+
+    if (!ok) return;
+
+    mutate(userId);
+  };
+
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -61,7 +86,11 @@ function RouteComponent() {
           </div>
         )}
         {data && data.data && (
-          <UserList users={data.data} handleEdit={handleEdit} />
+          <UserList
+            users={data.data}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+          />
         )}
         {data?.data?.length === 0 && searchTerm && (
           <NoResultSearch setSearchTerm={setSearchTerm} />
@@ -71,6 +100,7 @@ function RouteComponent() {
           setIsEditModalOpen={setIsEditModalOpen}
           isEditModalOpen={isEditModalOpen}
         />
+        <DeleteUserModal />
       </div>
     </div>
   );

@@ -22,9 +22,11 @@ export type User = {
 const UserList = ({
   users,
   handleEdit,
+  handleDelete,
 }: {
   users: User[];
   handleEdit: (user: User) => void;
+  handleDelete: (id: string) => void;
 }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -90,7 +92,9 @@ const UserList = ({
                 Edit
               </button>
               <button
-                onClick={() => {}}
+                onClick={() => {
+                  handleDelete(user.id);
+                }}
                 className="flex-1 flex items-center justify-center px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors duration-200"
               >
                 <Trash2 className="w-4 h-4 mr-2" />

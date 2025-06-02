@@ -1,25 +1,26 @@
-import type { ErrorResponse } from "@shared/types";
 import type { ErrorHandler } from "hono";
 
 import { HTTPException } from "hono/http-exception";
 
-import env from "@/env";
+import type { ErrorResponse } from "@shared/types";
+
+import env from "../../env";
 
 const onError: ErrorHandler = (err, c) => {
   if (err instanceof HTTPException) {
-    const errResponse
-      = err.res
-        ?? c.json<ErrorResponse>(
-          {
-            success: false,
-            error: err.message,
-            isFormError:
+    const errResponse =
+      err.res ??
+      c.json<ErrorResponse>(
+        {
+          success: false,
+          error: err.message,
+          isFormError:
             err.cause && typeof err.cause === "object" && "form" in err.cause
               ? err.cause.form === true
               : false,
-          },
-          err.status,
-        );
+        },
+        err.status
+      );
     return errResponse;
   }
 
@@ -31,7 +32,7 @@ const onError: ErrorHandler = (err, c) => {
           ? "Interal Server Error"
           : (err.stack ?? err.message),
     },
-    500,
+    500
   );
 };
 

@@ -1,16 +1,8 @@
-export type SuccessResponse<T = void> = {
-  success: true;
-  message: string;
-} & (T extends void ? object : { data: T });
-
 export interface ErrorResponse {
   success: false;
   error: string;
   isFormError?: boolean;
 }
-
-import { router } from "@/src";
-export type AppType = typeof router;
 
 export type {
   CreateUser,
@@ -19,10 +11,3 @@ export type {
   UpdateUser,
   DeleteUser,
 } from "../server/src/users/user.routes";
-
-export {
-  createUserSchema,
-  selectUserSchema,
-  updateUserSchema,
-  User,
-} from "../server/src/users/user.schema";

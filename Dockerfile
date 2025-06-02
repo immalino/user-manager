@@ -28,10 +28,6 @@ RUN cd client && npm run build
 # Copy built client files to server static directory
 RUN cp -r client/dist/ server/static/ 2>/dev/null || mkdir -p server/static
 
-# Build server
-
-RUN cd server && bun run db:push && bun run build
-
 # Production stage
 FROM oven/bun:1.1.34-alpine AS production
 
@@ -41,11 +37,14 @@ RUN apk add --no-cache curl
 WORKDIR /app
 
 # Copy only necessary files from builder stage
-COPY --from=builder /app/server/index.js ./
-COPY --from=builder /app/server/static ./static
+COPY --from=builder /app/server ./
+
+# Built server
+RUN bun install --production
+RUN bun run build
 
 # Expose the port
 EXPOSE 9999
 
 # Start the application
-CMD ["bun", "index.js"]
+ENTRYPOINT ["./entrypoint.sh"]

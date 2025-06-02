@@ -29,7 +29,9 @@ services:
 
   # UserManager Application
   app:
-    image: immalino/user-manager-app:1.0.1
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: usermanager-app
     restart: unless-stopped
     ports:

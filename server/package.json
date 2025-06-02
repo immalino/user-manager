@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "build": "bun build src/index.ts --outdir . --target bun",
+    "build": "bun build src/index.ts --outdir ./dist --target bun",
     "start": "bun dist/index.js",
     "lint": "eslint .",
     "lint:fix": "npm run lint --fix",

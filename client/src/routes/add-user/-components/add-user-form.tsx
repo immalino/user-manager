@@ -51,7 +51,6 @@ const AddUserForm = () => {
       <div className="p-8">
         <form
           onSubmit={(e) => {
-            console.log("first");
             e.preventDefault();
             e.stopPropagation();
             form.handleSubmit();

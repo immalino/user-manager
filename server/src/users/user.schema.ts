@@ -1,4 +1,5 @@
 import z from "zod";
+
 import { usersTable } from "../db/schema";
 
 export const createUserSchema = z.object({

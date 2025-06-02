@@ -2,9 +2,13 @@ import type { ErrorHandler } from "hono";
 
 import { HTTPException } from "hono/http-exception";
 
-import type { ErrorResponse } from "@shared/types";
-
 import env from "../../env";
+
+interface ErrorResponse {
+  success: false;
+  error: string;
+  isFormError?: boolean;
+}
 
 const onError: ErrorHandler = (err, c) => {
   if (err instanceof HTTPException) {

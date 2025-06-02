@@ -1,15 +1,27 @@
 import { createRoute, z } from "@hono/zod-openapi";
-import { jsonContent, jsonContentOneOf, jsonContentRequired } from "stoker/openapi/helpers";
+import { eq, ilike } from "drizzle-orm";
+import { DrizzleQueryError } from "drizzle-orm/errors";
+import { HTTPException } from "hono/http-exception";
+import {
+  jsonContent,
+  jsonContentOneOf,
+  jsonContentRequired,
+} from "stoker/openapi/helpers";
 import { createErrorSchema } from "stoker/openapi/schemas";
 
-import { createSuccessSchema, ErrorResponseSchema, SuccessResponseSchema } from "../helpers/open-api";
-import { createRouter } from "../libs/create-app";
-import { createUserSchema, selectUserSchema, updateUserSchema } from "./user.schema";
 import database from "../db";
 import { usersTable } from "../db/schema";
-import { HTTPException } from "hono/http-exception";
-import { DrizzleQueryError } from "drizzle-orm/errors";
-import { eq, ilike } from "drizzle-orm";
+import {
+  createSuccessSchema,
+  ErrorResponseSchema,
+  SuccessResponseSchema,
+} from "../helpers/open-api";
+import { createRouter } from "../libs/create-app";
+import {
+  createUserSchema,
+  selectUserSchema,
+  updateUserSchema,
+} from "./user.schema";
 
 const tags = ["Users"];
 
@@ -21,10 +33,19 @@ const createUserRoute = createRoute({
     body: jsonContentRequired(createUserSchema, "Create user"),
   },
   responses: {
-    201: jsonContent(createSuccessSchema(selectUserSchema, "Success create user"), "Created"),
+    201: jsonContent(
+      createSuccessSchema(selectUserSchema, "Success create user"),
+      "Created"
+    ),
     400: jsonContent(createErrorSchema(createUserSchema), "Bad request"),
-    409: jsonContent(ErrorResponseSchema( "Email already exists", true), "Conflict"),
-    500: jsonContent(ErrorResponseSchema("Internal Server Error", false), "Internal Server Error"),
+    409: jsonContent(
+      ErrorResponseSchema("Email already exists", true),
+      "Conflict"
+    ),
+    500: jsonContent(
+      ErrorResponseSchema("Internal Server Error", false),
+      "Internal Server Error"
+    ),
   },
 });
 
@@ -47,7 +68,7 @@ const getUsersRoute = createRoute({
       "Internal Server Error"
     ),
   },
-})
+});
 
 const getUserRoute = createRoute({
   method: "get",
@@ -87,14 +108,20 @@ const updateUserRoute = createRoute({
     body: jsonContentRequired(updateUserSchema, "Create user"),
     params: z.object({
       id: z.string().uuid(),
-    })
+    }),
   },
   responses: {
     201: jsonContent(
       createSuccessSchema(selectUserSchema, "Success update user"),
       "Updated"
     ),
-    400: jsonContentOneOf([createErrorSchema(updateUserSchema), createErrorSchema(z.object({ id: z.string().uuid() }))], "Bad request"),
+    400: jsonContentOneOf(
+      [
+        createErrorSchema(updateUserSchema),
+        createErrorSchema(z.object({ id: z.string().uuid() })),
+      ],
+      "Bad request"
+    ),
     404: jsonContent(ErrorResponseSchema("User not found", false), "Not found"),
     409: jsonContent(
       ErrorResponseSchema("Email already exists", true),
@@ -117,10 +144,7 @@ const deleteUserRoute = createRoute({
     }),
   },
   responses: {
-    200: jsonContent(
-      SuccessResponseSchema("Success delete user"),
-      "Deleted"
-    ),
+    200: jsonContent(SuccessResponseSchema("Success delete user"), "Deleted"),
     400: jsonContent(
       createErrorSchema(
         z.object({
@@ -134,8 +158,8 @@ const deleteUserRoute = createRoute({
       ErrorResponseSchema("Internal Server Error", false),
       "Internal Server Error"
     ),
-  }
-})
+  },
+});
 
 const createUser = createRouter().openapi(createUserRoute, async (c) => {
   const userData = c.req.valid("json");
@@ -165,7 +189,7 @@ const createUser = createRouter().openapi(createUserRoute, async (c) => {
     }
     throw new HTTPException(500, { message: "Internal Server Error" });
   }
-}); 
+});
 
 const getUsers = createRouter().openapi(getUsersRoute, async (c) => {
   const { search } = c.req.valid("query");
@@ -265,15 +289,15 @@ const deleteUser = createRouter().openapi(deleteUserRoute, async (c) => {
   );
 });
 
-export type CreateUser = typeof createUser
-export type GetUsers = typeof getUsers
-export type GetUser = typeof getUser
-export type UpdateUser = typeof updateUser
-export type DeleteUser = typeof deleteUser
+export type CreateUser = typeof createUser;
+export type GetUsers = typeof getUsers;
+export type GetUser = typeof getUser;
+export type UpdateUser = typeof updateUser;
+export type DeleteUser = typeof deleteUser;
 
 export const userRouter = createRouter()
-.route("/", createUser)
-.route("/", getUsers)
-.route("/", getUser)
-.route("/", updateUser)
-.route("/", deleteUser)  
+  .route("/", createUser)
+  .route("/", getUsers)
+  .route("/", getUser)
+  .route("/", updateUser)
+  .route("/", deleteUser);

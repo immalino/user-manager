@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17
+    container_name: usermanager-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-usermanager}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password123}
+      POSTGRES_DB: ${POSTGRES_DB:-usermanager_db}
+    ports:
+      - "5431:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./server/src/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - usermanager-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-usermanager} -d ${POSTGRES_DB:-usermanager_db}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # UserManager Application
+  app:
+    image: immalino/user-manager-app:1.0.1
+    container_name: usermanager-app
+    restart: unless-stopped
+    ports:
+      - "9999:9999"
+    environment:
+      NODE_ENV: production
+      PORT: 9999
+      POSTGRES_USER: ${POSTGRES_USER:-usermanager}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password123}
+      POSTGRES_DB: ${POSTGRES_DB:-usermanager_db}
+      DATABASE_URL: postgres://${POSTGRES_USER:-usermanager}:${POSTGRES_PASSWORD:-password123}@postgres:5432/${POSTGRES_DB:-usermanager_db}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - usermanager-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9999/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  usermanager-network:
+    driver: bridge
